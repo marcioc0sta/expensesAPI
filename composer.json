@@ -2,7 +2,7 @@
   "name": "marcio/meus-gastos",
   "autoload": {
     "psr-4": {
-      "Marcio\\MeusGastos\\": "src/"
+      "App\\": "src/"
     }
   },
   "authors": [
