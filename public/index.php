@@ -53,4 +53,28 @@ $app->post('/users', function (RequestInterface $request, ResponseInterface $res
     return $response->withHeader('Content-Type', 'application/json');
 });
 
+$app->post('/login', function (RequestInterface $request, ResponseInterface $response, array $args) {
+    $data = json_decode($request->getBody()->getContents(), true);
+    $db = $this->get('db');
+    
+    // Verify if user exists
+    $stmt = $db->prepare('SELECT * FROM users WHERE email = :email');
+    $stmt->execute(['email' => $data['email']]);
+    $user = $stmt->fetch();
+    if (!$user) {
+        $response->getBody()->write(json_encode(['error' => 'User not found']));
+        return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+    }
+    
+    // Verify password
+    if (!password_verify($data['password'], $user['password'])) {
+        $response->getBody()->write(json_encode(['error' => 'Invalid password']));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+    
+    //Return user info
+    $response->getBody()->write(json_encode(['id' => $user['id'], 'name' => $user['name'], 'email' => $user['email']]));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
 $app->run();
