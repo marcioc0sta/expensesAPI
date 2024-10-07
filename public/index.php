@@ -19,12 +19,6 @@ $container->set('db', function() use ($config) {
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 
-$app->get('/', function (RequestInterface $request, ResponseInterface $response, array $args) {
-    $response->getBody()->write('Hello from Slim 4 request handler');
-    return $response;
-});
-
-
 $app->get('/categories', function (RequestInterface $request, ResponseInterface $response, array $args) {
     $db = $this->get('db');
     $stmt = $db->query('SELECT * FROM categories');
