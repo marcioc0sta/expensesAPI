@@ -13,6 +13,8 @@
   ],
   "require": {
     "slim/slim": "^4.14",
-    "laminas/laminas-diactoros": "^3.4"
+    "laminas/laminas-diactoros": "^3.4",
+    "php-di/php-di": "^7.0",
+    "vlucas/phpdotenv": "^5.6"
   }
 }
