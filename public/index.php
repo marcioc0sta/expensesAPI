@@ -6,7 +6,6 @@ use Psr\Http\Message\ResponseInterface;
 use Slim\Factory\AppFactory;
 use DI\Container;
 use App\helpers\CategoriesEnum;
-use App\database\User;
 
 $config = require dirname(__DIR__) . '/db/config.php';
 require dirname(__DIR__) . '/db/db.php';
@@ -16,6 +15,11 @@ $container = new Container();
 // Set PDO instance in the container
 $container->set('db', function() use ($config) {
     return createPDO($config['db']);
+});
+
+// Register UserHandler
+$container->set('UserHandler', function ($container) {
+    return new App\handlers\UserHandler();
 });
 
 AppFactory::setContainer($container);
@@ -35,21 +39,9 @@ $app->get('/categories', function (RequestInterface $request, ResponseInterface 
 
 // Create user
 $app->post('/users', function (RequestInterface $request, ResponseInterface $response, array $args) {
-    $data = json_decode($request->getBody()->getContents(), true);
     $db = $this->get('db');
-    
-    // Verify if user already exists
-    $user = User::getUserByEmail($data, $db);
-    if ($user) {
-        $response->getBody()->write(json_encode(['error' => 'User already exists']));
-        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
-    }
-    
-    // Insert new user
-    $newUserId = User::createUser($data, $db);
-
-    $response->getBody()->write(json_encode(['message' => 'user id: ' . $newUserId . ' successfully created']));
-    return $response->withHeader('Content-Type', 'application/json');
+    $userHandler = $this->get('UserHandler');
+    return $userHandler->createUser($request, $response, $db);
 });
 
 // Login
