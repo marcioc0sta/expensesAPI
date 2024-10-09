@@ -17,23 +17,17 @@ $container->set('db', function() use ($config) {
     return createPDO($config['db']);
 });
 
-// Register UserHandler
-$container->set('UserHandler', function ($container) {
+// Register Handlers
+$container->set('UserHandler', function () {
     return new App\handlers\UserHandler();
 });
-
-// Register CategoryHandler
-$container->set('CategoriesHandler', function ($container) {
+$container->set('CategoriesHandler', function () {
     return new App\handlers\CategoriesHandler();
 });
-
-// Register LoginHandler
-$container->set('LoginHandler', function ($container) {
+$container->set('LoginHandler', function () {
     return new App\handlers\LoginHandler();
 });
-
-// Register ExpensesHandler
-$container->set('ExpensesHandler', function ($container) {
+$container->set('ExpensesHandler', function () {
     return new App\handlers\ExpensesHandler();
 });
 
@@ -44,58 +38,32 @@ $app = AppFactory::create();
 $categories = CategoriesEnum::getCategories();
 
 // Routes
-$app->get('/categories', function (RequestInterface $request, ResponseInterface $response, array $args) {
+$app->get('/categories', function (RequestInterface $request, ResponseInterface $response) {
     $db = $this->get('db');
     $categoryHandler = $this->get('CategoriesHandler');
     return $categoryHandler->getCategories($request, $response, $db);
 });
-$app->post('/users', function (RequestInterface $request, ResponseInterface $response, array $args) {
+$app->post('/users', function (RequestInterface $request, ResponseInterface $response) {
     $db = $this->get('db');
     $userHandler = $this->get('UserHandler');
     return $userHandler->createUser($request, $response, $db);
 });
-$app->post('/login', function (RequestInterface $request, ResponseInterface $response, array $args) {
+$app->post('/login', function (RequestInterface $request, ResponseInterface $response) {
     $data = json_decode($request->getBody()->getContents(), true);
     $db = $this->get('db');
     $loginHandler = $this->get('LoginHandler');
     return $loginHandler->login($request, $response, $db, $data);
 });
-$app->post('/expenses', function(RequestInterface $request, ResponseInterface $response, array $args){
+$app->post('/expenses', function(RequestInterface $request, ResponseInterface $response){
     $data = json_decode($request->getBody()->getContents(), true);
     $db = $this->get('db');
     $expensesHandler = $this->get('ExpensesHandler');
     return $expensesHandler->createExpense($request, $response, $data, $db);
 });
-
-// Get expenses by userId
-$app->get('/expenses/{userId}', function(RequestInterface $request, ResponseInterface $response, array $args) use ($categories) {
+$app->get('/expenses/{userId}', function(RequestInterface $request, ResponseInterface $response, array $args) {
     $db = $this->get('db');
-    $stmt = $db->prepare('SELECT * FROM expenses WHERE from_user = :userId');
-    $stmt->execute(['userId' => $args['userId']]);
-    $data = $stmt->fetchAll();
-
-    // Separate expenses by category and calculate totals
-    $expenses = [];
-    foreach ($data as $expense) {
-        $categoryName = $categories[$expense['category']] ?? 'Unknown';
-        if (!isset($expenses[$categoryName])) {
-            $expenses[$categoryName] = [
-                'total' => 0,
-                'items' => []
-            ];
-        }
-        $expenses[$categoryName]['items'][] = $expense;
-        $expenses[$categoryName]['total'] += $expense['value'];
-    }
-
-    // Remove empty keys and format totals
-    $expenses = array_filter($expenses);
-    foreach ($expenses as $category => &$categoryData) {
-        $categoryData['total'] = number_format(ceil($categoryData['total'] * 100) / 100, 2, '.', '');
-    }
-
-    $response->getBody()->write(json_encode($expenses));
-    return $response->withHeader('Content-Type', 'application/json');
+    $expensesHandler = $this->get('ExpensesHandler');
+    return $expensesHandler->getExpensesByUserId($request, $response, $db, $args);
 });
 
 // Get expenses by year and month

@@ -12,4 +12,12 @@ class Expenses {
         'date' => $data['date']
     ]);
   }
+
+  public static function getExpensesByUserId($userId, $db) {
+    $stmt = $db->prepare('SELECT * FROM expenses WHERE from_user = :userId');
+    $stmt->execute(['userId' => $userId]);
+    $data = $stmt->fetchAll();
+
+    return $data;
+  }
 }

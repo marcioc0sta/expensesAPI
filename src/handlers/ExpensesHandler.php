@@ -6,6 +6,8 @@ use Psr\Http\Message\ResponseInterface;
 use App\database\User;
 use App\database\Categories;
 use App\database\Expenses;
+use App\helpers\CategoriesEnum;
+use App\helpers\ExpensesTotals;
 
 class ExpensesHandler {
   public static function createExpense(RequestInterface $request, ResponseInterface $response, $data, $db) {
@@ -27,6 +29,16 @@ class ExpensesHandler {
     Expenses::insertExpense($data, $db);
 
     $response->getBody()->write(json_encode(['message' => 'expense successfully created']));
+    return $response->withHeader('Content-Type', 'application/json');
+  }
+
+  public static function getExpensesByUserId(RequestInterface $request, ResponseInterface $response, $db, $args) {
+    $data = Expenses::getExpensesByUserId($args['userId'], $db);
+
+    // Separate expenses by category and calculate totals
+    $expensesWithTotals = ExpensesTotals::getTotals($data, CategoriesEnum::getCategories());
+
+    $response->getBody()->write(json_encode($expensesWithTotals));
     return $response->withHeader('Content-Type', 'application/json');
   }
 }
