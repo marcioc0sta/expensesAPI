@@ -27,6 +27,11 @@ $container->set('CategoriesHandler', function ($container) {
     return new App\handlers\CategoriesHandler();
 });
 
+// Register LoginHandler
+$container->set('LoginHandler', function ($container) {
+    return new App\handlers\LoginHandler();
+});
+
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 
@@ -51,25 +56,8 @@ $app->post('/users', function (RequestInterface $request, ResponseInterface $res
 $app->post('/login', function (RequestInterface $request, ResponseInterface $response, array $args) {
     $data = json_decode($request->getBody()->getContents(), true);
     $db = $this->get('db');
-    
-    // Verify if user exists
-    $stmt = $db->prepare('SELECT * FROM users WHERE email = :email');
-    $stmt->execute(['email' => $data['email']]);
-    $user = $stmt->fetch();
-    if (!$user) {
-        $response->getBody()->write(json_encode(['error' => 'User not found']));
-        return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
-    }
-    
-    // Verify password
-    if (!password_verify($data['password'], $user['password'])) {
-        $response->getBody()->write(json_encode(['error' => 'Invalid password']));
-        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
-    }
-    
-    //Return user info
-    $response->getBody()->write(json_encode(['id' => $user['id'], 'name' => $user['name'], 'email' => $user['email']]));
-    return $response->withHeader('Content-Type', 'application/json');
+    $loginHandler = $this->get('LoginHandler');
+    return $loginHandler->login($request, $response, $db, $data);
 });
 
 // Insert expense
