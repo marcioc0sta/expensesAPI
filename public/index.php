@@ -43,29 +43,23 @@ $app = AppFactory::create();
 // Get categories from CategoryEnum
 $categories = CategoriesEnum::getCategories();
 
-// Get all categories
+// Routes
 $app->get('/categories', function (RequestInterface $request, ResponseInterface $response, array $args) {
     $db = $this->get('db');
     $categoryHandler = $this->get('CategoriesHandler');
     return $categoryHandler->getCategories($request, $response, $db);
 });
-
-// Create user
 $app->post('/users', function (RequestInterface $request, ResponseInterface $response, array $args) {
     $db = $this->get('db');
     $userHandler = $this->get('UserHandler');
     return $userHandler->createUser($request, $response, $db);
 });
-
-// Login
 $app->post('/login', function (RequestInterface $request, ResponseInterface $response, array $args) {
     $data = json_decode($request->getBody()->getContents(), true);
     $db = $this->get('db');
     $loginHandler = $this->get('LoginHandler');
     return $loginHandler->login($request, $response, $db, $data);
 });
-
-// Insert expense
 $app->post('/expenses', function(RequestInterface $request, ResponseInterface $response, array $args){
     $data = json_decode($request->getBody()->getContents(), true);
     $db = $this->get('db');
