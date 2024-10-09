@@ -22,6 +22,11 @@ $container->set('UserHandler', function ($container) {
     return new App\handlers\UserHandler();
 });
 
+// Register CategoryHandler
+$container->set('CategoriesHandler', function ($container) {
+    return new App\handlers\CategoriesHandler();
+});
+
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 
@@ -31,10 +36,8 @@ $categories = CategoriesEnum::getCategories();
 // Get all categories
 $app->get('/categories', function (RequestInterface $request, ResponseInterface $response, array $args) {
     $db = $this->get('db');
-    $stmt = $db->query('SELECT * FROM categories');
-    $data = $stmt->fetchAll();
-    $response->getBody()->write(json_encode($data));
-    return $response->withHeader('Content-Type', 'application/json');
+    $categoryHandler = $this->get('CategoriesHandler');
+    return $categoryHandler->getCategories($request, $response, $db);
 });
 
 // Create user
