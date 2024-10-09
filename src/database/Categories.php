@@ -7,4 +7,12 @@ class Categories {
     $data = $stmt->fetchAll();
     return $data;
   }
+
+  public static function getCategoryById($id, $db) {
+    $stmt = $db->prepare('SELECT * FROM categories WHERE id = :id');
+    $stmt->execute(['id' => $id]);
+    $category = $stmt->fetch();
+
+    return $category;
+  }
 }

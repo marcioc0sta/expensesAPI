@@ -22,4 +22,12 @@ class User {
     ]);
     return $db->lastInsertId();
   }
+
+  public static function getUserById($id, $db) {
+    $stmt = $db->prepare('SELECT * FROM users WHERE id = :id');
+    $stmt->execute(['id' => $id]);
+    $user = $stmt->fetch();
+
+    return $user;
+  }
 }

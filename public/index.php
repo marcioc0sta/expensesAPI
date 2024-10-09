@@ -32,6 +32,11 @@ $container->set('LoginHandler', function ($container) {
     return new App\handlers\LoginHandler();
 });
 
+// Register ExpensesHandler
+$container->set('ExpensesHandler', function ($container) {
+    return new App\handlers\ExpensesHandler();
+});
+
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 
@@ -64,37 +69,8 @@ $app->post('/login', function (RequestInterface $request, ResponseInterface $res
 $app->post('/expenses', function(RequestInterface $request, ResponseInterface $response, array $args){
     $data = json_decode($request->getBody()->getContents(), true);
     $db = $this->get('db');
-
-    // expense
-    $stmt = $db->prepare('INSERT INTO expenses (from_user, description, category, value, date) VALUES (:from_user, :description, :category, :value, :date)');
-    $stmt->execute([
-        'from_user' => $data['userId'],
-        'description' => $data['description'],
-        'category' => $data['category'],
-        'value' => $data['value'],
-        'date' => $data['date']
-    ]);
-
-    // Verify if the expense has a valid category
-    $stmt = $db->prepare('SELECT * FROM categories WHERE id = :id');
-    $stmt->execute(['id' => $data['category']]);
-    $category = $stmt->fetch();
-    if (!$category) {
-        $response->getBody()->write(json_encode(['error' => 'Invalid expense category']));
-        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
-    }
-
-    // Verifu if the expense has a valid user
-    $stmt = $db->prepare('SELECT * FROM users WHERE id = :id');
-    $stmt->execute(['id' => $data['userId']]);
-    $user = $stmt->fetch();
-    if (!$user) {
-        $response->getBody()->write(json_encode(['error' => 'Invalid user']));
-        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
-    }
-
-    $response->getBody()->write(json_encode(['message' => 'expense successfully created']));
-    return $response->withHeader('Content-Type', 'application/json');
+    $expensesHandler = $this->get('ExpensesHandler');
+    return $expensesHandler->createExpense($request, $response, $data, $db);
 });
 
 // Get expenses by userId
