@@ -5,8 +5,8 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Factory\AppFactory;
 use DI\Container;
-use App\helpers\EncryptPassword;
 use App\helpers\CategoriesEnum;
+use App\database\User;
 
 $config = require dirname(__DIR__) . '/db/config.php';
 require dirname(__DIR__) . '/db/db.php';
@@ -36,26 +36,19 @@ $app->get('/categories', function (RequestInterface $request, ResponseInterface 
 // Create user
 $app->post('/users', function (RequestInterface $request, ResponseInterface $response, array $args) {
     $data = json_decode($request->getBody()->getContents(), true);
-    $encryptedPassword = EncryptPassword::encrypt($data['password']);
     $db = $this->get('db');
     
     // Verify if user already exists
-    $stmt = $db->prepare('SELECT * FROM users WHERE email = :email');
-    $stmt->execute(['email' => $data['email']]);
-    $user = $stmt->fetch();
+    $user = User::getUserByEmail($data, $db);
     if ($user) {
         $response->getBody()->write(json_encode(['error' => 'User already exists']));
         return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
     }
     
     // Insert new user
-    $stmt = $db->prepare('INSERT INTO users (name, email, password) VALUES (:name, :email, :password)');
-    $stmt->execute([
-        'name' => $data['name'],
-        'email' => $data['email'],
-        'password' => $encryptedPassword
-    ]);
-    $response->getBody()->write(json_encode(['message' => 'user id: ' . $db->lastInsertId() . ' successfully created']));
+    $newUserId = User::createUser($data, $db);
+
+    $response->getBody()->write(json_encode(['message' => 'user id: ' . $newUserId . ' successfully created']));
     return $response->withHeader('Content-Type', 'application/json');
 });
 
