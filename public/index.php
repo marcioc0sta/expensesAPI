@@ -5,7 +5,6 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Factory\AppFactory;
 use DI\Container;
-use App\helpers\CategoriesEnum;
 
 $config = require dirname(__DIR__) . '/db/config.php';
 require dirname(__DIR__) . '/db/db.php';
@@ -33,9 +32,6 @@ $container->set('ExpensesHandler', function () {
 
 AppFactory::setContainer($container);
 $app = AppFactory::create();
-
-// Get categories from CategoryEnum
-$categories = CategoriesEnum::getCategories();
 
 // Routes
 $app->get('/categories', function (RequestInterface $request, ResponseInterface $response) {
@@ -70,11 +66,18 @@ $app->get('/expenses/{userId}/{year}/{month}', function(RequestInterface $reques
     $expensesHandler = $this->get('ExpensesHandler');
     return $expensesHandler->getExpensesByMonthAndYear($request, $response, $db, $args);
 });
-$app->get('/expenses/{userId}/{month}', function(RequestInterface $request, ResponseInterface $response, array $args) use ($categories) {
+$app->get('/expenses/{userId}/{month}', function(RequestInterface $request, ResponseInterface $response, array $args) {
     $db = $this->get('db');
     $expensesHandler = $this->get('ExpensesHandler');
     return $expensesHandler->getExpensesByMonth($request, $response, $db, $args);
 });
+$app->put('/expenses/{id}', function(RequestInterface $request, ResponseInterface $response, array $args) {
+    $data = json_decode($request->getBody()->getContents(), true);
+    $db = $this->get('db');
+    $args['id'] = (int) $args['id'];
 
+    $expensesHandler = $this->get('ExpensesHandler');
+    return $expensesHandler->editExpense($request, $response, $data, $db, $args);
+});
 
 $app->run();

@@ -59,4 +59,33 @@ class ExpensesHandler {
     $response->getBody()->write(json_encode($expensesWithTotals));
     return $response->withHeader('Content-Type', 'application/json');
   }
+
+  public static function editExpense(RequestInterface $request, ResponseInterface $response, $data, $db, $args) {
+    // Verify if the expense has a valid category
+    $category = Categories::getCategoryById($data['category'], $db);
+    if (!$category) {
+        $response->getBody()->write(json_encode(['error' => 'Invalid expense category']));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+
+    // Verify if the expense has a valid user
+    $user = User::getUserById($data['userId'], $db);
+    if (!$user) {
+        $response->getBody()->write(json_encode(['error' => 'Invalid user']));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+
+    // Verify if the expense belongs to the user
+    $expense = Expenses::getExpenseById($args['id'], $db);
+    if ($expense['from_user'] != $data['userId']) {
+        $response->getBody()->write(json_encode(['error' => 'Invalid user for this expense']));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+
+    // Update expense
+    Expenses::updateExpense($data, $db, $args);
+
+    $response->getBody()->write(json_encode(['message' => 'expense successfully updated']));
+    return $response->withHeader('Content-Type', 'application/json');
+  }
 }
