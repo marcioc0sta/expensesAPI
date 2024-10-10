@@ -65,41 +65,15 @@ $app->get('/expenses/{userId}', function(RequestInterface $request, ResponseInte
     $expensesHandler = $this->get('ExpensesHandler');
     return $expensesHandler->getExpensesByUserId($request, $response, $db, $args);
 });
-$app->get('/expenses/{userId}/{year}/{month}', function(RequestInterface $request, ResponseInterface $response, array $args) use ($categories) {
+$app->get('/expenses/{userId}/{year}/{month}', function(RequestInterface $request, ResponseInterface $response, array $args) {
     $db = $this->get('db');
     $expensesHandler = $this->get('ExpensesHandler');
     return $expensesHandler->getExpensesByMonthAndYear($request, $response, $db, $args);
 });
-
-// Get expenses by month
 $app->get('/expenses/{userId}/{month}', function(RequestInterface $request, ResponseInterface $response, array $args) use ($categories) {
     $db = $this->get('db');
-    $stmt = $db->prepare('SELECT * FROM expenses WHERE from_user = :userId AND MONTH(date) = :month');
-    $stmt->execute(['userId' => $args['userId'], 'month' => $args['month']]);
-    $data = $stmt->fetchAll();
-
-    // Separate expenses by category and calculate totals
-    $expenses = [];
-    foreach ($data as $expense) {
-        $categoryName = $categories[$expense['category']] ?? 'Unknown';
-        if (!isset($expenses[$categoryName])) {
-            $expenses[$categoryName] = [
-                'total' => 0,
-                'items' => []
-            ];
-        }
-        $expenses[$categoryName]['items'][] = $expense;
-        $expenses[$categoryName]['total'] += $expense['value'];
-    }
-
-    // Remove empty keys and format totals
-    $expenses = array_filter($expenses);
-    foreach ($expenses as $category => &$categoryData) {
-        $categoryData['total'] = number_format(ceil($categoryData['total'] * 100) / 100, 2, '.', '');
-    }
-
-    $response->getBody()->write(json_encode($expenses));
-    return $response->withHeader('Content-Type', 'application/json');
+    $expensesHandler = $this->get('ExpensesHandler');
+    return $expensesHandler->getExpensesByMonth($request, $response, $db, $args);
 });
 
 

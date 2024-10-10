@@ -50,4 +50,13 @@ class ExpensesHandler {
     $response->getBody()->write(json_encode($expensesWithTotals));
     return $response->withHeader('Content-Type', 'application/json');
   }
+
+  public static function getExpensesByMonth(RequestInterface $request, ResponseInterface $response, $db, $args) {
+    $data = Expenses::getExpensesByMonth($args, $db);
+
+    // Separate expenses by category and calculate totals
+    $expensesWithTotals = ExpensesTotals::getTotals($data, CategoriesEnum::getCategories());
+    $response->getBody()->write(json_encode($expensesWithTotals));
+    return $response->withHeader('Content-Type', 'application/json');
+  }
 }

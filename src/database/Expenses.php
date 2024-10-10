@@ -28,4 +28,12 @@ class Expenses {
 
     return $data;
   }
+
+  public static function  getExpensesByMonth($args, $db) {
+    $stmt = $db->prepare('SELECT * FROM expenses WHERE from_user = :userId AND MONTH(date) = :month');
+    $stmt->execute(['userId' => $args['userId'], 'month' => $args['month']]);
+    $data = $stmt->fetchAll();
+
+    return $data;
+  }
 }
