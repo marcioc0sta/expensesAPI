@@ -37,6 +37,11 @@ $app = AppFactory::create();
 // Register CORS Middleware
 $app->add(new CorsMiddleware());
 
+// Handle preflight OPTIONS requests
+$app->options('/{routes:.+}', function (RequestInterface $request, ResponseInterface $response) {
+    return $response;
+});
+
 // Routes
 $app->get('/categories', function (RequestInterface $request, ResponseInterface $response) {
     $db = $this->get('db');
