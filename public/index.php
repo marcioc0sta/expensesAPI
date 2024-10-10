@@ -5,6 +5,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Factory\AppFactory;
 use DI\Container;
+use App\middleware\CorsMiddleware;
 
 $config = require dirname(__DIR__) . '/db/config.php';
 require dirname(__DIR__) . '/db/db.php';
@@ -32,6 +33,9 @@ $container->set('ExpensesHandler', function () {
 
 AppFactory::setContainer($container);
 $app = AppFactory::create();
+
+// Register CORS Middleware
+$app->add(new CorsMiddleware());
 
 // Routes
 $app->get('/categories', function (RequestInterface $request, ResponseInterface $response) {
