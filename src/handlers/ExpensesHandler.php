@@ -88,4 +88,19 @@ class ExpensesHandler {
     $response->getBody()->write(json_encode(['message' => 'expense successfully updated']));
     return $response->withHeader('Content-Type', 'application/json');
   }
+
+  public static function deleteExpense(RequestInterface $request, ResponseInterface $response, $data, $db, $args) {
+    // Verify if the expense belongs to the user
+    $expense = Expenses::getExpenseById($args['id'], $db);
+    if ($expense['from_user'] != $data['userId']) {
+        $response->getBody()->write(json_encode(['error' => 'Invalid user for this expense']));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+
+    // Delete expense
+    Expenses::deleteExpense($args['id'], $db);
+
+    $response->getBody()->write(json_encode(['message' => 'expense successfully deleted']));
+    return $response->withHeader('Content-Type', 'application/json');
+  }
 }

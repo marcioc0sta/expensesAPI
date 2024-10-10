@@ -79,5 +79,13 @@ $app->put('/expenses/{id}', function(RequestInterface $request, ResponseInterfac
     $expensesHandler = $this->get('ExpensesHandler');
     return $expensesHandler->editExpense($request, $response, $data, $db, $args);
 });
+$app->delete('/expenses/{id}', function(RequestInterface $request, ResponseInterface $response, array $args) {
+    $data = json_decode($request->getBody()->getContents(), true);
+    $db = $this->get('db');
+    $args['id'] = (int) $args['id'];
+
+    $expensesHandler = $this->get('ExpensesHandler');
+    return $expensesHandler->deleteExpense($request, $response, $data, $db, $args);
+});
 
 $app->run();

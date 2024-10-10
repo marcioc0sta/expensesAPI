@@ -57,4 +57,9 @@ class Expenses {
         'id' => $id
     ]);
   }
+
+  public static function deleteExpense($id, $db) {
+    $stmt = $db->prepare('DELETE FROM expenses WHERE id = :id');
+    $stmt->execute(['id' => $id]);
+  }
 }
