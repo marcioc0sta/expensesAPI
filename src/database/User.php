@@ -38,4 +38,18 @@ class User {
         'id' => $data['userId']
     ]);
   }
+
+  public static function updateUser($userId, $fields, $db) {
+    $setClause = [];
+    $params = ['id' => $userId];
+
+    foreach ($fields as $field => $value) {
+        $setClause[] = "$field = :$field";
+        $params[$field] = $value;
+    }
+
+    $setClause = implode(', ', $setClause);
+    $stmt = $db->prepare("UPDATE users SET $setClause WHERE id = :id");
+    $stmt->execute($params);
+}
 }

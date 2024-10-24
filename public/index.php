@@ -58,6 +58,11 @@ $app->put('/users/income', function (RequestInterface $request, ResponseInterfac
     $userHandler = $this->get('UserHandler');
     return $userHandler->updateIncome($request, $response, $db);
 });
+$app->put('/users', function (RequestInterface $request, ResponseInterface $response) {
+    $db = $this->get('db');
+    $userHandler = $this->get('UserHandler');
+    return $userHandler->updateUser($request, $response, $db);
+});
 $app->post('/login', function (RequestInterface $request, ResponseInterface $response) {
     $data = json_decode($request->getBody()->getContents(), true);
     $db = $this->get('db');
