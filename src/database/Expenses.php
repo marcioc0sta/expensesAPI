@@ -22,7 +22,7 @@ class Expenses {
   }
 
   public static function getExpensesByMonthAndYear($args, $db) {
-    $stmt = $db->prepare('SELECT * FROM expenses WHERE from_user = :userId AND YEAR(date) = :year AND MONTH(date) = :month');
+    $stmt = $db->prepare('SELECT * FROM expenses WHERE from_user = :userId AND EXTRACT(YEAR FROM date) = :year AND EXTRACT(MONTH FROM date) = :month');
     $stmt->execute(['userId' => $args['userId'], 'year' => $args['year'], 'month' => $args['month']]);
     $data = $stmt->fetchAll();
 
@@ -30,7 +30,7 @@ class Expenses {
   }
 
   public static function getExpensesByMonth($args, $db) {
-    $stmt = $db->prepare('SELECT * FROM expenses WHERE from_user = :userId AND MONTH(date) = :month');
+    $stmt = $db->prepare('SELECT * FROM expenses WHERE from_user = :userId AND EXTRACT(MONTH FROM date) = :month');
     $stmt->execute(['userId' => $args['userId'], 'month' => $args['month']]);
     $data = $stmt->fetchAll();
 
