@@ -18,7 +18,7 @@ class ExpensesHandler {
         return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
     }
 
-    // Verifu if the expense has a valid user
+    // Verify if the expense has a valid user
     $user = User::getUserById($data['userId'], $db);
     if (!$user) {
         $response->getBody()->write(json_encode(['error' => 'Invalid user']));

@@ -22,7 +22,7 @@ class LoginHandler {
     }
     
     //Return user info
-    $response->getBody()->write(json_encode(['id' => $user['id'], 'name' => $user['name'], 'email' => $user['email']]));
+    $response->getBody()->write(json_encode(['id' => $user['id'], 'name' => $user['name'], 'email' => $user['email'], 'user_income' => $user['user_income']]));
     return $response->withHeader('Content-Type', 'application/json');
   }
 }

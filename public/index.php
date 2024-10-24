@@ -53,6 +53,11 @@ $app->post('/users', function (RequestInterface $request, ResponseInterface $res
     $userHandler = $this->get('UserHandler');
     return $userHandler->createUser($request, $response, $db);
 });
+$app->put('/users/income', function (RequestInterface $request, ResponseInterface $response) {
+    $db = $this->get('db');
+    $userHandler = $this->get('UserHandler');
+    return $userHandler->updateIncome($request, $response, $db);
+});
 $app->post('/login', function (RequestInterface $request, ResponseInterface $response) {
     $data = json_decode($request->getBody()->getContents(), true);
     $db = $this->get('db');

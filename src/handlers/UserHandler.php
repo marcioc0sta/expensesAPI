@@ -23,4 +23,21 @@ class UserHandler {
     $response->getBody()->write(json_encode(['message' => 'user id: ' . $newUserId . ' successfully created']));
     return $response->withHeader('Content-Type', 'application/json');
   }
+
+  public function updateIncome(RequestInterface $request, ResponseInterface $response, $db) {
+    $data = json_decode($request->getBody()->getContents(), true);
+
+    // Verify if user already exists
+    $user = User::getUserById($data['userId'], $db);
+    if (!$user) {
+        $response->getBody()->write(json_encode(['error' => 'Invalid user']));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+    
+    // Update user income
+    User::updateUserIncome($data, $db);
+
+    $response->getBody()->write(json_encode(['message' => 'user income successfully updated']));
+    return $response->withHeader('Content-Type', 'application/json');
+  }
 }

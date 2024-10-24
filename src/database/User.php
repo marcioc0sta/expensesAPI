@@ -30,4 +30,12 @@ class User {
 
     return $user;
   }
+
+  public static function updateUserIncome($data, $db) {
+    $stmt = $db->prepare('UPDATE users SET user_income = :income WHERE id = :id');
+    $stmt->execute([
+        'income' => $data['income'],
+        'id' => $data['userId']
+    ]);
+  }
 }
